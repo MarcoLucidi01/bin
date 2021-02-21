@@ -1,0 +1,9 @@
+#!/bin/sh
+
+set -e
+
+in="$1"
+out=`echo "$in" | awk 'BEGIN { FS = OFS = "." } { $NF = "part-%02d."$NF; print }'`
+segtime="$2"
+
+ffmpeg -i "$in" -f segment -segment_time "$segtime" -reset_timestamps 1 -c copy "$out"

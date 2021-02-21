@@ -1,0 +1,4 @@
+#!/bin/sh
+
+killall -SIGHUP sbard
+tmux refresh-client -S

@@ -1,0 +1,94 @@
+#!/usr/bin/env python3
+
+import requests
+import sys
+
+def google_translate(source, target, text):
+    url = "https://translate.googleapis.com/translate_a/single"
+    params = { "client": "gtx", "dt": "t", "sl": source, "tl": target, "q": text }
+
+    resp = requests.get(url, params=params)
+    if resp.status_code != 200:
+        return None
+
+    resp_lines = [ l[0] for l in resp.json()[0] ]
+    return ''.join(resp_lines)
+
+
+CODE_TO_LANG = {
+    "auto": "auto", "af": "afrikaans", "sq": "albanian", "ar": "arabic",
+    "az": "azerbaijani", "eu": "basque", "be": "belarusian", "bn": "bengali",
+    "bg": "bulgarian", "ca": "catalan", "zh-cn": "chinese simplified",
+    "zh-tw": "chinese traditional", "hr": "croatian", "cs": "czech",
+    "da": "danish", "nl": "dutch", "en": "english", "eo": "esperanto",
+    "et": "estonian", "tl": "filipino", "fi": "finnish", "fr": "french",
+    "gl": "galician", "ka": "georgian", "de": "german", "el": "greek",
+    "gu": "gujarati", "ht": "haitian creole", "iw": "hebrew", "hi": "hindi",
+    "hu": "hungarian", "is": "icelandic", "id": "indonesian", "ga": "irish",
+    "it": "italian", "ja": "japanese", "kn": "kannada", "ko": "korean",
+    "la": "latin", "lv": "latvian", "lt": "lithuanian", "mk": "macedonian",
+    "ms": "malay", "mt": "maltese", "no": "norwegian", "fa": "persian",
+    "pl": "polish", "pt": "portuguese", "ro": "romanian", "ru": "russian",
+    "sr": "serbian", "sk": "slovak", "sl": "slovenian", "es": "spanish",
+    "sw": "swahili", "sv": "swedish", "ta": "tamil", "te": "telugu",
+    "th": "thai", "uk": "ukrainian", "ur": "urdu", "vi": "vietnamese",
+    "cy": "welsh", "yi": "yiddish", "tr": "turkish"
+}
+
+def usage():
+    print("""Usage: translate [-l] [source:]target [text...]\n
+Quick and dirty script used to translate text with Google Translate.
+source and target must be valid languages codes (-l to get a list).
+target is mandatory, source can be guessed.
+By default reads from stdin.\n
+    -l      list available languages
+    -h      show this message\n
+It can break at any moment.
+
+EXAMPLES
+
+$ translate en Ciao mondo!
+Hello World!
+$ translate it:fr Ciao mondo!
+Bonjour le monde!
+$ echo "Ciao mondo!" | translate es
+¡Hola mundo!""")
+
+def list_langs():
+    for code, lang in sorted(CODE_TO_LANG.items(), key=lambda e: e[1]):
+        print("{:<7}{}".format(code, lang))
+
+def parse_code(code):
+    code = code.lower()
+    return code if code in CODE_TO_LANG else None
+
+def parse_codes(codes):
+    codes = codes.split(":")
+    source = codes[0] if len(codes) >= 2 else "auto"
+    target = codes[1] if len(codes) >= 2 else codes[0]
+    return parse_code(source), parse_code(target)
+
+def main():
+    if len(sys.argv) < 2:
+        sys.exit("Error: target language code is missing")
+
+    if sys.argv[1] == "-h":
+        usage()
+        return
+    elif sys.argv[1] == "-l":
+        list_langs()
+        return
+
+    source, target = parse_codes(sys.argv[1])
+    if source is None or target is None:
+        sys.exit("Error: unknown language code")
+
+    text = ' '.join(sys.argv[2:]) if len(sys.argv) > 2 else sys.stdin.read()
+
+    translated_text = google_translate(source, target, text)
+    if translated_text is None:
+        sys.exit("Error: response status code != 200")
+    print(translated_text)
+
+if __name__ == "__main__":
+    main()

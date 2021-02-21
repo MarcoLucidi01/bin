@@ -1,0 +1,27 @@
+#!/bin/sh
+
+# Maintenance commands I like to run every once in a while.
+
+BACKUP_DIR="/home/marco/backup/`hostname`"
+
+set -e
+set -x
+
+sudo apt-get update
+sudo apt-get dist-upgrade
+sudo apt-get autoremove --purge
+sudo apt-get clean
+
+sudo fstrim -av
+
+if ping -c 1 -W 1 "nas"; then
+        rsync -aAXzvi\
+              --progress\
+              --numeric-ids\
+              --exclude=mnt\
+              --delete\
+              --rsync-path="mkdir -p $BACKUP_DIR && rsync"\
+              -e ssh\
+              "$HOME"\
+              "nas:$BACKUP_DIR"
+fi
