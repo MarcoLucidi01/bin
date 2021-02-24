@@ -1,8 +1,8 @@
 #!/bin/sh
 
-# Maintenance commands I like to run every once in a while.
+# maintenance: upgrade and backup system.
 
-BACKUP_DIR="/home/marco/backup/`hostname`"
+backupdir="/home/marco/backup/`hostname`"
 
 set -e
 set -x
@@ -15,13 +15,11 @@ sudo apt-get clean
 sudo fstrim -av
 
 if ping -c 1 -W 1 "nas"; then
-        rsync -aAXzvi\
-              --progress\
-              --numeric-ids\
-              --exclude=mnt\
-              --delete\
-              --rsync-path="mkdir -p $BACKUP_DIR && rsync"\
-              -e ssh\
-              "$HOME"\
-              "nas:$BACKUP_DIR"
+        rsync -aAXzvi \
+              --progress \
+              --numeric-ids \
+              --exclude=mnt \
+              --delete \
+              --rsync-path="mkdir -p $backupdir && rsync" \
+              -e ssh "$HOME" "nas:$backupdir"
 fi
