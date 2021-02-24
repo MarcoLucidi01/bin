@@ -1,0 +1,5 @@
+#!/bin/sh
+
+# temp: print average system temperature in degree celsius.
+
+awk '{ s += $0 } END { print s / NR / 1000.0 }' /sys/class/thermal/thermal_zone*/temp
