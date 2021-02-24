@@ -1,0 +1,65 @@
+#!/bin/sh
+
+# web: search or open things in the web browser from command line.
+
+browser="firefox"
+
+case "$1" in
+"-h" | "--help")
+        echo "usage: web [-p|--private] [a|g|h|m|r|s|t|w|wa|y] [search query...|url|file]"
+        exit 0
+        ;;
+"-p" | "--private")
+        browser="$browser --private-window"
+        shift
+        ;;
+esac
+
+case "$1" in
+"a")
+        baseurl="https://amazon.it/s/?field-keywords=" ;;
+"g")
+        baseurl="https://google.com/search?q=" ;;
+"h")
+        baseurl="https://news.ycombinator.com/" ;;
+"m")
+        baseurl="https://google.com/maps?q=" ;;
+"r")
+        baseurl="https://old.reddit.com/r/" ;;
+"s")
+        baseurl="https://google.com/search?q=site:stackoverflow.com+" ;;
+"t")
+        baseurl="https://web.telegram.org/" ;;
+"w")
+        baseurl="https://wikipedia.org/w/index.php?title=Special:Search&search=" ;;
+"wa")
+        baseurl="https://web.whatsapp.com/" ;;
+"y")
+        baseurl="https://youtube.com/results?search_query=" ;;
+*)
+        baseurl="" ;;
+esac
+
+if [ -z "$baseurl" ]; then
+        baseurl="https://google.com/search?q="
+else
+        shift
+fi
+
+IFS='+'
+query="$*"
+IFS=' '
+
+if [ -z "$query" ]; then
+        baseurl="`echo "$baseurl" | cut -d '/' -f 1-3`"
+elif [ -f "$query" ]; then
+        query="file://`readlink -f $query`"
+fi
+
+case "$query" in "http://"* | "https://"* | "file://"*)
+        baseurl="" ;;
+esac
+
+cd "$HOME" # don't keep current directory busy by the browser
+
+$browser "$baseurl$query" > /dev/null 2>&1 &
