@@ -1,0 +1,23 @@
+#!/bin/sh
+
+# youtube: search, select and play youtube videos from command line (no api).
+#          (many thanks to https://github.com/pystardust/ytfzf)
+
+case "$1" in "-h" | "--help")
+        echo "usage: youtube search_query..."
+        exit 0
+esac
+
+curl -s -G "https://www.youtube.com/results" --data-urlencode "search_query=$*" \
+ | grep "var *ytInitialData" \
+ | sed -E 's#^.*var ytInitialData ?=(.*)} *; *</script>.*#\1}#' \
+ | jq -r '..
+    | .videoRenderer?
+    | select(.)
+    | [.title.runs[0].text[:65], (.lengthText.simpleText//"N/A"), (.shortViewCountText.simpleText//"N/A"), (.publishedTimeText.simpleText//"N/A"), .longBylineText.runs[0].text, .videoId]
+    | @tsv' \
+ | column -s "`printf '\t'`" -t \
+ | fzf \
+ | awk '{ print $NF }' \
+ | sed 's#^#https://youtube.com/watch?v=#' \
+ | xargs -r mpv
