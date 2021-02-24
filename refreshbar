@@ -1,4 +1,6 @@
 #!/bin/sh
 
+# refreshbar: force tmux and dwm status bar update.
+
 killall -SIGHUP sbard
 tmux refresh-client -S
