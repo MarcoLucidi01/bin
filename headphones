@@ -1,0 +1,23 @@
+#!/bin/sh
+
+# headphones: connect or disconnect bluetooth headphones.
+
+set -e
+
+device="A8:4D:4A:08:98:AE"
+
+case "$1" in
+"-h" | "--help")
+        echo "usage: headphones [on|off]"
+        exit 0
+        ;;
+"off")
+        bluetoothctl disconnect "$device"
+        ;;
+*)
+        bluetoothctl connect "$device"
+        pacmd set-default-sink "bluez_sink.`echo $device | sed 's/:/_/g'`.a2dp_sink"
+        ;;
+esac
+
+refreshbar
