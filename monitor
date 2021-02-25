@@ -1,0 +1,31 @@
+#!/bin/sh
+
+# monitor: turn on or off second monitor if connected.
+
+case "$1" in "-h" | "--help")
+        echo "usage: monitor [on|off]"
+        exit 0
+        ;;
+esac
+
+outputs="HDMI1 DP2"
+
+output=""
+for out in $outputs; do
+        if xrandr | grep -q "$out connected"; then
+                output="$out"
+                break
+        fi
+done
+
+if [ -z "$output" ]; then
+        echo "error: $outputs: none connected" >&2
+        exit 1
+fi
+
+case "$1" in
+"off")
+        xrandr --output "$output" --off ;;
+*)
+        xrandr --output "$output" --auto --primary --above eDP1 ;;
+esac
