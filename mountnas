@@ -1,0 +1,19 @@
+#!/bin/sh
+
+# mountnas: mount or unmount my nas data directory using sshfs.
+
+mountpoint="$HOME/mnt/nas"
+
+case "$1" in
+"-h" | "--help")
+        echo "usage: mountnas [-u|--unmount]"
+        exit 0
+        ;;
+"-u" | "--unmount")
+        fusermount -u "$mountpoint"
+        ;;
+*)
+        mkdir -p "$mountpoint"
+        sshfs "nas:/home/marco/data" "$mountpoint"
+        ;;
+esac
