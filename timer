@@ -1,19 +1,10 @@
 #!/bin/sh
 
-# Countdown timer. Takes an integer greater than -1 as input representing the
-# number of minutes. Current time (in seconds) is queried only at the beginning.
-# It merely adds 1 to that value so it's by no means a precise timer.
-# Sound file and program used to play sound can be easily modified editing
-# play_sound function.
+# timer: countdown timer. spawns an alert window when is done.
 
-play_sound()
-{
-        aplay -q "$HOME/bin/drin.wav"
-}
-
-[ "$1" -eq "$1" ] 2> /dev/null          # if $1 is not a number test will fail
+[ "$1" -eq "$1" ] 2> /dev/null  # fails if $1 is not a number
 if [ "$?" -ne 0 ] || [ "$1" -lt 0 ]; then
-        >&2 echo "Error: invalid input, please provide an integer >= 0"
+        echo "usage: timer minutes [tag...]" >&2
         exit 1
 fi
 
@@ -25,5 +16,8 @@ while [ "$now" -lt "$end" ]; do
         sleep 1
         now="$(( $now + 1 ))"
 done
-printf "\n"
-play_sound
+echo
+
+msg="timer $*
+done!"
+gxmessage -bg red -fg white -center -font "monospace 50" -default okay -title "$msg" "$msg"
