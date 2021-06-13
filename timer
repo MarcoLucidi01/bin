@@ -1,10 +1,16 @@
 #!/bin/sh
 
-# timer: countdown timer. spawns an alert window when is done.
+# timer: countdown timer. spawns an alert window when time is up.
+
+case "$1" in "-h" | "--help")
+        echo "usage: timer minutes [tag...]"
+        exit 0
+        ;;
+esac
 
 [ "$1" -eq "$1" ] 2> /dev/null  # fails if $1 is not a number
 if [ "$?" -ne 0 ] || [ "$1" -lt 0 ]; then
-        echo "usage: timer minutes [tag...]" >&2
+        echo "error: \"$1\": invalid number of minutes" >&2
         exit 1
 fi
 
