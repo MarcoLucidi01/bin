@@ -1,11 +1,11 @@
 #!/bin/sh
 
-# monitor: turn on or off second monitor if connected.
+# 2monitor: turn on or off second monitor if connected.
 
 outputs="HDMI1 DP2"
 
 case "$1" in "-h" | "--help")
-        echo "usage: monitor [on|off]"
+        echo "usage: 2monitor [on|off]"
         exit 0
         ;;
 esac
