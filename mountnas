@@ -2,6 +2,7 @@
 
 # mountnas: mount or unmount my nas data directory using sshfs.
 
+dir="$HOME/data"
 mountpoint="$HOME/mnt/nas"
 
 case "$1" in
@@ -14,6 +15,6 @@ case "$1" in
         ;;
 *)
         mkdir -p "$mountpoint"
-        sshfs "nas:/home/marco/data" "$mountpoint"
+        sshfs "nas:$dir" "$mountpoint"
         ;;
 esac
