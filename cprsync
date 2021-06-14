@@ -1,0 +1,5 @@
+#!/bin/sh
+
+# cprsync: rsync defaults to use it as an alternative cp.
+
+rsync --archive --partial --modify-window=1 --info=progress2 --human-readable --itemize-changes "$@"
