@@ -16,7 +16,7 @@ curl -s -G "https://www.youtube.com/results" --data-urlencode "search_query=$*" 
     | select(.)
     | [.title.runs[0].text[:65], (.lengthText.simpleText//"N/A"), (.shortViewCountText.simpleText//"N/A"), (.publishedTimeText.simpleText//"N/A"), .longBylineText.runs[0].text, .videoId]
     | @tsv' \
- | column -s "`printf '\t'`" -t \
+ | column -s "$(printf '\t')" -t \
  | fzf \
  | awk '{ print $NF }' \
  | sed 's#^#https://youtube.com/watch?v=#' \

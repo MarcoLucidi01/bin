@@ -14,7 +14,7 @@ if [ "$?" -ne 0 ] || [ "$1" -lt 0 ]; then
         exit 1
 fi
 
-now="`date +%s`"
+now="$(date +%s)"
 end="$(( $now + $1 * 60 ))"
 while [ "$now" -lt "$end" ]; do
         rem="$(( $end - $now ))"

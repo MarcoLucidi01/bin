@@ -16,7 +16,7 @@ case "$1" in
         ;;
 *)
         bluetoothctl connect "$device"
-        pacmd set-default-sink "bluez_sink.`echo $device | sed 's/:/_/g'`.a2dp_sink"
+        pacmd set-default-sink "bluez_sink.$(echo $device | sed 's/:/_/g').a2dp_sink"
         ;;
 esac
 
