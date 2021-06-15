@@ -1,0 +1,20 @@
+#!/bin/sh
+
+# mountphone: mount or unmount my phone storage directory using sshfs (termux).
+
+dir="/storage"
+mountpoint="$HOME/mnt/phone"
+
+case "$1" in
+"-h" | "--help")
+        echo "usage: mountphone [-u|--unmount]"
+        exit 0
+        ;;
+"-u" | "--unmount")
+        fusermount -u "$mountpoint"
+        ;;
+*)
+        mkdir -p "$mountpoint"
+        sshfs "phone:$dir" "$mountpoint"
+        ;;
+esac
