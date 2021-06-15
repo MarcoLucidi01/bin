@@ -1,0 +1,10 @@
+#!/bin/sh
+
+# upgrade: upgrade installed packages and clean.
+
+set -e
+
+sudo apt-get update
+sudo apt-get dist-upgrade
+sudo apt-get autoremove --purge
+sudo apt-get clean
