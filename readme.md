@@ -1,7 +1,6 @@
 bin
 ===
 
-my utility scripts.
+my utility scripts. see [`makefile`](makefile) to install them.
 
-by default they get installed into `$HOME/bin`. you can change that providing a
-different `PREFIX` to `make`.
+see also [dotfiles](https://github.com/MarcoLucidi01/dotfiles).
