@@ -6,7 +6,7 @@ browser="firefox"
 
 case "$1" in
 "-h" | "--help")
-        echo "usage: web [-p|--private] [a|g|h|m|r|s|t|w|wa|y] [search query...|url|file]"
+        echo "usage: web [-p|--private] [a|g|m|r|s|t|w|wa|y] [search query...|url|file]"
         exit 0
         ;;
 "-p" | "--private")
@@ -20,8 +20,6 @@ case "$1" in
         baseurl="https://amazon.it/s/?field-keywords=" ;;
 "g")
         baseurl="https://google.com/search?q=" ;;
-"h")
-        baseurl="https://news.ycombinator.com/" ;;
 "m")
         baseurl="https://google.com/maps?q=" ;;
 "r")
