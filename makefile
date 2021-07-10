@@ -1,9 +1,13 @@
 .POSIX:
 
-PREFIX  = $(HOME)
-DEST    = $(DESTDIR)$(PREFIX)/bin
-EXCLUDE = $(patsubst %,--exclude="%", .git* *.swp makefile readme.md license)
+PREFIX = $(HOME)
+DEST   = $(DESTDIR)$(PREFIX)/bin
+IGNORE = \.git.*|.*\.swp|makefile|readme\.md|license
+STOW   = stow --verbose --no-folding --ignore="$(IGNORE)" --target="$(DEST)"
 
 install:
 	mkdir -p "$(DEST)"
-	rsync -ai --chmod F744 $(EXCLUDE) . "$(DEST)"
+	$(STOW) .
+
+uninstall:
+	$(STOW) --delete .
