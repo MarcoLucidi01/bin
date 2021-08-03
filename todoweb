@@ -1,0 +1,18 @@
+#!/bin/sh
+
+# todoweb: use a todo description as web arguments.
+#          see https://github.com/MarcoLucidi01/todo
+
+case "$1" in "-h" | "--help")
+        echo "usage: todoweb id [web opts...]"
+        exit 0
+esac
+
+desc="$(todo -o "$1")"
+ret=$?
+if [ $ret -ne 0 ]; then
+        exit $ret
+fi
+
+shift
+echo "$desc" | xargs web "$@"
