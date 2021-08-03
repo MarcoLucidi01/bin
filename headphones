@@ -4,19 +4,27 @@
 
 set -e
 
-device="A8:4D:4A:08:98:AE"
-
 case "$1" in
 "-h" | "--help")
-        echo "usage: headphones [on|off]"
+        echo "usage: headphones device [on|off]"
         exit 0
         ;;
+"" | "on" | "off")
+        echo "error: device not provided" >&2
+        exit 1
+        ;;
+esac
+
+device="$1"
+op="$2"
+
+case "$op" in
 "off")
         bluetoothctl disconnect "$device"
         ;;
 *)
         bluetoothctl connect "$device"
-        pacmd set-default-sink "bluez_sink.$(echo $device | sed 's/:/_/g').a2dp_sink"
+        pacmd set-default-sink "bluez_sink.$(echo "$device" | sed 's/:/_/g').a2dp_sink"
         ;;
 esac
 
