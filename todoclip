@@ -1,0 +1,19 @@
+#!/bin/sh
+
+# todoclip: copy todo descriptions to x11 selections.
+#           see https://github.com/MarcoLucidi01/todo
+
+case "$1" in "-h" | "--help")
+        echo "usage: todoclip [id...]"
+        exit 0
+esac
+
+desc="$(todo -o "$@")"
+ret=$?
+if [ $ret -ne 0 ]; then
+        exit $ret
+fi
+
+for sel in primary secondary clipboard; do
+        echo "$desc" | xclip -rmlastnl -selection "$sel"
+done
