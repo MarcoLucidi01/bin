@@ -2,7 +2,7 @@
 
 # 2monitor: turn on or off second monitor if connected.
 
-outputs="HDMI1 DP2"
+outputs="HDMI-1 DP-2"
 
 case "$1" in "-h" | "--help")
         echo "usage: 2monitor [on|off]"
@@ -27,5 +27,5 @@ case "$1" in
 "off")
         xrandr --output "$output" --off ;;
 *)
-        xrandr --output "$output" --auto --primary --pos 0x0 --output eDP1 --pos 1920x640 ;;
+        xrandr --output "$output" --auto --primary --pos 0x0 --output eDP-1 --pos 1920x640 ;;
 esac
