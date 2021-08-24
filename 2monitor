@@ -2,7 +2,8 @@
 
 # 2monitor: turn on or off second monitor if connected.
 
-outputs="HDMI-1 DP-2"
+internal="eDP-1"
+external="HDMI-1 DP-2"
 
 case "$1" in "-h" | "--help")
         echo "usage: 2monitor [on|off]"
@@ -11,7 +12,7 @@ case "$1" in "-h" | "--help")
 esac
 
 output=""
-for out in $outputs; do
+for out in $external; do
         if xrandr | grep -q "$out connected"; then
                 output="$out"
                 break
@@ -19,13 +20,16 @@ for out in $outputs; do
 done
 
 if [ -z "$output" ]; then
-        echo "error: $outputs: none connected" >&2
+        echo "error: $external: none connected" >&2
         exit 1
 fi
 
 case "$1" in
 "off")
-        xrandr --output "$output" --off ;;
+        xrandr --output "$output" --off --output "$internal" --auto --primary ;;
 *)
-        xrandr --output "$output" --auto --primary --pos 0x0 --output eDP-1 --pos 1920x640 ;;
+        xrandr --output "$output" --auto --primary --pos 0x0 --output "$internal" --pos 1920x640 ;;
 esac
+
+# compton breaks after (re)configuring monitors. restart it if was running.
+killall --quiet compton && compton --daemon
