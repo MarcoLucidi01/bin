@@ -1,0 +1,35 @@
+#!/bin/sh
+
+# playing: print path, title and playback time of current mpv's playing file.
+
+sock="/tmp/mpv-socket"
+
+mpvrunning() {
+        [ -S "$sock" ] && jq -nc '{"command":["get_version"]}' | socat - "$sock" > /dev/null 2>&1
+}
+
+getproperty() {
+        jq -nc --arg prop "$1" '{"command":["get_property",$prop]}' | socat - "$sock" | jq -r '.data'
+}
+
+formattime() {
+        secs="$(printf '%.0f' "$1")"
+        printf '%02d:%02d:%02d' "$(( secs/3600 ))" "$(( secs%3600/60 ))" "$(( secs%60 ))"
+}
+
+if ! mpvrunning; then
+        echo "error: mpv not running" >&2
+        exit 1
+fi
+
+getproperty "path"
+getproperty "media-title"
+
+paused=""
+if [ "$(getproperty "pause")" = "true" ]; then
+        paused="(paused) "
+fi
+pos=$(getproperty "time-pos")
+tot=$(getproperty "duration")
+perc=$(getproperty "percent-pos")
+printf '%s%s / %s (%.0f%%)\n' "$paused" "$(formattime "$pos")" "$(formattime "$tot")" "$perc"
