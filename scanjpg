@@ -1,0 +1,23 @@
+#!/bin/sh
+
+# scanjpg: scan an image in jpeg format.
+
+scan() {
+        scanimage --format=jpeg --resolution 300
+}
+
+case "$1" in
+"-h" | "--help")
+        echo "usage: scanjpg [output]"
+        exit 0
+        ;;
+"-")
+        scan
+        ;;
+"")
+        scan > "scan-$(date +'%Y%m%d-%H%M%S').jpg"
+        ;;
+*)
+        scan > "$1"
+        ;;
+esac

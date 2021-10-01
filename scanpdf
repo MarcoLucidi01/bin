@@ -1,0 +1,16 @@
+#!/bin/sh
+
+# scanpdf: scan an image in pdf format.
+
+case "$1" in "-h" | "--help")
+        echo "usage: scanpdf [output]"
+        exit 0
+        ;;
+esac
+
+output="$1"
+if [ -z "$output" ]; then
+        output="scan-$(date +'%Y%m%d-%H%M%S').pdf"
+fi
+
+scanjpg - | convert - "pdf:$output"
