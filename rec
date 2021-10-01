@@ -1,0 +1,32 @@
+#!/bin/sh
+
+# rec: record screen.
+
+output="rec-$(date +'%Y%m%d-%H%M%S').mp4"
+videosize="1920x1080"
+framerate="25"
+
+skeypid=""
+skeytimeout="0.6"
+
+case "$1" in
+"-h" | "--help")
+        echo "usage: rec [-k|--show-keys] [output]"
+        exit 0
+        ;;
+"-k" | "--show-keys")
+        screenkey --timeout "$skeytimeout" &
+        skeypid="$!"
+        shift
+        ;;
+esac
+
+if [ -n "$1" ]; then
+        output="$1"
+fi
+
+ffmpeg -video_size "$videosize" -framerate "$framerate" -f x11grab -i "$DISPLAY" "$output"
+
+if [ -n "$skeypid" ]; then
+        kill "$skeypid"
+fi
