@@ -30,6 +30,3 @@ case "$1" in
 *)
         xrandr --output "$output" --auto --primary --pos 0x0 --output "$internal" --pos 1920x640 ;;
 esac
-
-# compton breaks after (re)configuring monitors. restart it if was running.
-killall --quiet compton && compton --daemon
