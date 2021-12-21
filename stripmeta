@@ -1,0 +1,10 @@
+#!/bin/sh
+
+# stripmeta: remove meta information from media files.
+#            THE FILES ARE OVERWRITTEN!
+#            eyeD3 is for mp3 files because exiftool does not support writing to
+#            mp3 files. I assume that if exiftool fails is because of mp3.
+
+set -x
+
+exiftool -overwrite_original -all= "$@" || eyeD3 --remove-all "$@"
