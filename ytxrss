@@ -1,9 +1,9 @@
 #!/bin/sh
 
-# yxrss: extract rss feed url of youtube channels.
+# ytxrss: extract rss feed url of youtube channels.
 
 case "$1" in "-h" | "--help")
-        echo "usage: yxrss [video-or-channel-url...]"
+        echo "usage: ytxrss [video-or-channel-url...]"
         exit 0
         ;;
 esac
