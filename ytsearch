@@ -1,10 +1,10 @@
 #!/bin/sh
 
-# youtube: search, select and play youtube videos from command line (no api).
-#          (many thanks to https://github.com/pystardust/ytfzf)
+# ytsearch: search and select youtube video links (no api).
+#           (many thanks to https://github.com/pystardust/ytfzf)
 
 case "$1" in "-h" | "--help")
-        echo "usage: youtube search_query..."
+        echo "usage: ytsearch query..."
         exit 0
 esac
 
@@ -19,5 +19,4 @@ curl -s -G "https://www.youtube.com/results" --data-urlencode "search_query=$*" 
  | column -s "$(printf '\t')" -t \
  | fzf \
  | awk '{ print $NF }' \
- | sed 's#^#https://youtube.com/watch?v=#' \
- | xargs -r mpv
+ | sed 's#^#https://youtube.com/watch?v=#'
