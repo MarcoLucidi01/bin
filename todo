@@ -1,0 +1,65 @@
+#!/bin/sh
+
+# todo: minimal command-line todo list.
+#       this is actually a reimplementation of an hello world program I wrote in
+#       go and in c before, but i figured a shell script is more than enough for
+#       my needs. highly inspired by https://github.com/sjl/t
+
+list="$HOME/.todo"
+
+trim() {
+        echo "$@" | awk '{
+            for (i = 1; i <= NF; i++) {
+                gsub(/^[[:space:]]+|[[:space:]]+$/, "", $i);
+                printf "%s%s", $i, (i == NF ? "" : OFS);
+            }
+        }'
+}
+
+validate() {
+        echo "$@" | awk '{
+            for (i = 1; i <= NF; i++)
+                if ($i !~ /^[0-9]+$/ || $i <= 0)
+                    exit 1;
+        }'
+}
+
+die() {
+        echo "error:" "$@" >&2
+        exit 1
+}
+
+[ -f "$list" ] || touch "$list"
+
+case "$1" in
+"-h" | "--help")
+        echo "usage: todo [-c|-e|-n] [id...] [-|desc...]"
+        ;;
+"")
+        awk '{ printf "%2d ", NR; print }' "$list"
+        ;;
+"-c")
+        shift
+        ids="$(trim "$@")"
+        # shellcheck disable=SC2015
+        [ -n "$ids" ] && validate "$ids" || die "invalid or missing todo id(s)"
+        sed "$(echo "$ids" | sed -e 's/[[:space:]]\+/d;/g' -e 's/$/d;/')" "$list" > "$list.$$.tmp" && mv "$list.$$.tmp" "$list"
+        ;;
+"-e")
+        id="$(trim "$2")"
+        validate "$id" || die "invalid todo id"
+        vim "+$id" "$list" # +[num] is vim specific, that's why the editor is hardcoded here.
+        ;;
+"-n")
+        shift
+        ids="$(trim "$@")"
+        validate "$ids" || die "invalid todo id(s)"
+        sed -n "$(echo "$ids" | sed -e 's/[[:space:]]\+/p;/g' -e 's/$/p;/')" "$list"
+        ;;
+"-")
+        cat >> "$list"
+        ;;
+*)
+        echo "$@" >> "$list"
+        ;;
+esac
