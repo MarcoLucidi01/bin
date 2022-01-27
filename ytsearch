@@ -9,8 +9,7 @@ case "$1" in "-h" | "--help")
 esac
 
 curl -s -G "https://www.youtube.com/results" --data-urlencode "search_query=$*" \
- | grep "var *ytInitialData" \
- | sed -E 's#^.*var ytInitialData ?=(.*)} *; *</script>.*#\1}#' \
+ | sed -n -E 's#^.*var ytInitialData ?=(.*)} *; *</script>.*#\1}#p' \
  | jq -r '..
     | .videoRenderer?
     | select(.)
@@ -18,5 +17,4 @@ curl -s -G "https://www.youtube.com/results" --data-urlencode "search_query=$*" 
     | @tsv' \
  | column -s "$(printf '\t')" -t \
  | fzf \
- | awk '{ print $NF }' \
- | sed 's#^#https://youtube.com/watch?v=#'
+ | awk '{ print "https://youtube.com/watch?v="$NF }'
