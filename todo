@@ -33,12 +33,12 @@ die() {
 
 case "$1" in
 "-h" | "--help")
-        echo "usage: todo [-c|-e|-n] [id...] [-|desc...]"
+        echo "usage: todo [-x|-e|-n] [id...] [-|desc...]"
         ;;
 "")
         awk '{ printf "%2d ", NR; print }' "$list"
         ;;
-"-c")
+"-x")
         shift
         ids="$(trim "$@")"
         # shellcheck disable=SC2015
