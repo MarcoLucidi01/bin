@@ -4,7 +4,7 @@
 
 browser="firefox"
 homepage="about:home"
-defaultengine="https://google.com/search?q="
+defaultengine="https://www.google.com/search?q="
 
 case "$1" in
 "-h" | "--help")
@@ -19,23 +19,23 @@ esac
 
 case "$1" in
 "a")
-        baseurl="https://amazon.it/s/?field-keywords=" ;;
+        baseurl="https://www.amazon.it/s/?field-keywords=" ;;
 "g")
-        baseurl="https://google.com/search?q=" ;;
+        baseurl="https://www.google.com/search?q=" ;;
 "m")
-        baseurl="https://google.com/maps?q=" ;;
+        baseurl="https://www.google.com/maps?q=" ;;
 "r")
         baseurl="https://old.reddit.com/r/" ;;
 "s")
-        baseurl="https://google.com/search?q=site:stackoverflow.com+" ;;
+        baseurl="https://www.google.com/search?q=site:stackoverflow.com+" ;;
 "t")
         baseurl="https://web.telegram.org/" ;;
 "w")
-        baseurl="https://wikipedia.org/w/index.php?title=Special:Search&search=" ;;
+        baseurl="https://en.wikipedia.org/w/index.php?title=Special:Search&search=" ;;
 "wa")
         baseurl="https://web.whatsapp.com/" ;;
 "y")
-        baseurl="https://youtube.com/results?search_query=" ;;
+        baseurl="https://www.youtube.com/results?search_query=" ;;
 *)
         baseurl="" ;;
 esac

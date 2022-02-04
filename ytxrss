@@ -17,5 +17,5 @@ for url in "$@"; do
                 continue
         fi
 
-        printf "https://youtube.com/feeds/videos.xml?channel_id=%s\n" "$channelid"
+        printf "https://www.youtube.com/feeds/videos.xml?channel_id=%s\n" "$channelid"
 done

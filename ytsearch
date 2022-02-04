@@ -17,4 +17,4 @@ curl -s -G "https://www.youtube.com/results" --data-urlencode "search_query=$*" 
     | @tsv' \
  | column -s "$(printf '\t')" -t \
  | fzf \
- | awk '{ print "https://youtube.com/watch?v="$NF }'
+ | awk '{ print "https://www.youtube.com/watch?v="$NF }'
