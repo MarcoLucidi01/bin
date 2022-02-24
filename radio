@@ -1,0 +1,39 @@
+#!/bin/sh
+
+# radio: play some radio.
+#        $radiourls is a plain text file, the radio url must be the last field,
+#        e.g.:
+#          Radio Los Santos       https://rockstar.com/rls.mp3
+#          West Coast Classics    https://rockstar.com/wcc.mp3
+#
+#        tips:
+#        - put your favorite radio at the top of the list to play it first.
+#        - https://radio.garden is a nice place to scrape urls.
+
+radiourls="$HOME/.radiourls"
+
+[ -f "$radiourls" ] || touch "$radiourls"
+
+case "$1" in
+"-h" | "--help")
+        echo "usage: radio [-s|-z] [name]"
+        exit 0
+        ;;
+"-s")
+        radios="$(awk 'NF' "$radiourls" | shuf)"
+        ;;
+"-z")
+        radios="$(awk 'NF' "$radiourls" | fzf)"
+        ;;
+*)
+        radios="$(awk -v "name=$1" 'NF && index(tolower($0), tolower(name))' "$radiourls")"
+        ;;
+esac
+
+if [ -z "$radios" ]; then
+        echo "error: no radio to play" >&2
+        exit 1
+fi
+
+echo "$radios" | awk 'NF > 1 { NF-- } { print ++i, $0 }'
+echo "$radios" | awk '{ print $NF }' | mpv --playlist=-
