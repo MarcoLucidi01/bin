@@ -13,8 +13,8 @@ curl -s -G "https://www.youtube.com/results" --data-urlencode "search_query=$*" 
  | jq -r '..
     | .videoRenderer?
     | select(.)
-    | [.title.runs[0].text[:65], (.lengthText.simpleText//"N/A"), (.shortViewCountText.simpleText//"N/A"), (.publishedTimeText.simpleText//"N/A"), .longBylineText.runs[0].text, .videoId]
+    | [.title.runs[0].text[:80], (.lengthText.simpleText//"N/A"), (.shortViewCountText.simpleText//"N/A"), (.publishedTimeText.simpleText//"N/A"), .longBylineText.runs[0].text, .videoId]
     | @tsv' \
  | column -s "$(printf '\t')" -t \
- | fzf \
+ | fzf --with-nth=..-2 \
  | awk '{ print "https://www.youtube.com/watch?v="$NF }'
