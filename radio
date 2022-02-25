@@ -23,7 +23,7 @@ case "$1" in
         radios="$(awk 'NF' "$radiourls" | shuf)"
         ;;
 "-z")
-        radios="$(awk 'NF' "$radiourls" | fzf)"
+        radios="$(awk 'NF == 1 { printf "%s%s", $0, FS } NF' "$radiourls" | fzf --with-nth=..-2)"
         ;;
 *)
         radios="$(awk -v "name=$1" 'NF && index(tolower($0), tolower(name))' "$radiourls")"
