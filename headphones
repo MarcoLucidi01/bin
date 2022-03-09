@@ -1,29 +1,47 @@
 #!/bin/sh
 
-# headphones: connect or disconnect bluetooth headphones.
+# headphones: connect/disconnect/setprofile to bluetooth headphones.
 
 set -e
 
-case "$1" in
-"-h" | "--help")
-        echo "usage: headphones device [on|off]"
-        exit 0
-        ;;
-"" | "on" | "off")
-        echo "error: device not provided" >&2
+die() {
+        echo "error:" "$@" >&2
         exit 1
-        ;;
-esac
+}
+
+if [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
+        echo "usage: headphones device [on|off|a2dp|hfp]"
+        exit 0
+elif [ -z "$1" ]; then
+        die "device not provided"
+elif ! echo "$1" | grep -q ':'; then
+        die "$1: invalid device (should be a mac address)"
+fi
 
 device="$1"
+bluezcard="bluez_card.$(echo "$device" | tr ':' '_')"
+defaultprofile="a2dp_sink"
 op="$2"
 
 case "$op" in
 "off")
         bluetoothctl disconnect "$device"
         ;;
-*)
+"" | "on")
         bluetoothctl connect "$device"
+        sleep 2 # give pulse audio time to detect and set default sink.
+        pacmd set-card-profile "$bluezcard" "$defaultprofile"
+        ;;
+"a" | "a2" | "a2d" | "a2dp" | "a2dp_sink")
+        # good audio quality for listening music.
+        pacmd set-card-profile "$bluezcard" "a2dp_sink"
+        ;;
+"h" | "hsp" | "hfp" | "head" | "headset" | "headset_head_unit")
+        # shitty audio quality, but allows to use microphone.
+        pacmd set-card-profile "$bluezcard" "headset_head_unit"
+        ;;
+*)
+        die "$op: unknown operation"
         ;;
 esac
 
