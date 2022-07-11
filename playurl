@@ -1,39 +1,43 @@
 #!/bin/sh
 
-# radio: play some radio.
-#        $radiourls is a plain text file, the radio url must be the last field,
-#        e.g.:
-#          Radio Los Santos       https://rockstar.com/rls.mp3
-#          West Coast Classics    https://rockstar.com/wcc.mp3
+# playurl: select and play urls with mpv.
+#          urlsfile is a plain text file containing the urls list, it must be
+#          the first argument of playurl (i recommend to create some aliases for
+#          convenience, i have "radio" and "tv"). the url must be the last field
+#          in the file, e.g:
 #
-#        tips:
-#        - put your favorite radio at the top of the list to play it first.
-#        - https://radio.garden is a nice place to scrape urls.
+#            Radio Los Santos       https://rockstar.com/rls.mp3
+#            West Coast Classics    https://rockstar.com/wcc.mp3
+#
+#          tips:
+#          - put your favorite url at the top of the list to play it first.
+#          - https://radio.garden is a nice place to scrape radio urls.
+#          - https://github.com/iptv-org/iptv is nice for tv urls.
 
-radiourls="$HOME/.radiourls"
+if [ "$1" = "-h" ] || [ "$1" = "--help" ] || [ "$2" = "-h" ] || [ "$2" = "--help" ]; then
+        echo "usage: playurl urlsfile [-s|-z] [name]"
+        exit 0
+fi
 
-[ -f "$radiourls" ] || touch "$radiourls"
+urlsfile="$1"
+shift
 
 case "$1" in
-"-h" | "--help")
-        echo "usage: radio [-s|-z] [name]"
-        exit 0
-        ;;
 "-s")
-        radios="$(awk 'NF' "$radiourls" | shuf)"
+        urls="$(awk 'NF' "$urlsfile" | shuf)"
         ;;
 "-z")
-        radios="$(awk 'NF == 1 { printf "%s%s", $0, FS } NF' "$radiourls" | fzf --with-nth=..-2)"
+        urls="$(awk 'NF == 1 { printf "%s%s", $0, FS } NF' "$urlsfile" | fzf --with-nth=..-2)"
         ;;
 *)
-        radios="$(awk -v "name=$1" 'NF && index(tolower($0), tolower(name))' "$radiourls")"
+        urls="$(awk -v "name=$*" 'NF && index(tolower($0), tolower(name))' "$urlsfile")"
         ;;
 esac
 
-if [ -z "$radios" ]; then
-        echo "error: no radio to play" >&2
+if [ -z "$urls" ]; then
+        echo "error: no url to play" >&2
         exit 1
 fi
 
-echo "$radios" | awk 'NF > 1 { NF-- } { print ++i, $0 }'
-echo "$radios" | awk '{ print $NF }' | mpv --playlist=-
+echo "$urls" | awk 'NF > 1 { NF-- } { print ++i, $0 }'
+echo "$urls" | awk '{ print $NF }' | mpv --playlist=-
