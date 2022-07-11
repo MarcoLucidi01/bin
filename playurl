@@ -15,7 +15,7 @@
 #          - https://github.com/iptv-org/iptv is nice for tv urls.
 
 if [ "$1" = "-h" ] || [ "$1" = "--help" ] || [ "$2" = "-h" ] || [ "$2" = "--help" ]; then
-        echo "usage: playurl urlsfile [-s|-z] [name]"
+        echo "usage: playurl urlsfile [-l|-s|-z] [name]"
         exit 0
 fi
 
@@ -23,6 +23,10 @@ urlsfile="$1"
 shift
 
 case "$1" in
+"-l")
+        awk 'NF > 1 { NF-- } NF { print ++i, $0 }' "$urlsfile"
+        exit 0
+        ;;
 "-s")
         urls="$(awk 'NF' "$urlsfile" | shuf)"
         ;;
