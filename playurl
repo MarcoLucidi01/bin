@@ -15,7 +15,7 @@
 #          - https://github.com/iptv-org/iptv is nice for tv urls.
 
 if [ "$1" = "-h" ] || [ "$1" = "--help" ] || [ "$2" = "-h" ] || [ "$2" = "--help" ]; then
-        echo "usage: playurl urlsfile [-l|-s|-z] [name]"
+        echo "usage: playurl urlsfile [-l|-s|-z] [name|number]"
         exit 0
 fi
 
@@ -34,7 +34,11 @@ case "$1" in
         urls="$(awk 'NF == 1 { printf "%s%s", $0, FS } NF' "$urlsfile" | fzf --with-nth=..-2)"
         ;;
 *)
-        urls="$(awk -v "name=$*" 'NF && index(tolower($0), tolower(name))' "$urlsfile")"
+        if [ -n "$*" ] && [ "$*" -eq "$*" ] 2> /dev/null; then # is number
+                urls="$(awk -v "n=$*" 'NF && ++i == n { print; exit }' "$urlsfile")"
+        else
+                urls="$(awk -v "name=$*" 'NF && index(tolower($0), tolower(name))' "$urlsfile")"
+        fi
         ;;
 esac
 
