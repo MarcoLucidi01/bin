@@ -43,7 +43,7 @@ case "$1" in
         ids="$(trim "$@")"
         # shellcheck disable=SC2015
         [ -n "$ids" ] && validate "$ids" || die "invalid or missing todo id(s)"
-        sed "$(echo "$ids" | sed -e 's/[[:space:]]\+/d;/g' -e 's/$/d;/')" "$list" > "$list.$$.tmp" && mv "$list.$$.tmp" "$list"
+        sed "$(echo "$ids" | sed -e 's/[[:space:]]\+/d;/g' -e 's/$/d;/')" "$list" > "$list.$$.tmp" && mv "$list.$$.tmp" "$(readlink -f "$list")"
         ;;
 "-e")
         id="$(trim "$2")"
