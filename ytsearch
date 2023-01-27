@@ -9,7 +9,8 @@ case "$1" in "-h" | "--help")
 esac
 
 curl -s -G "https://www.youtube.com/results" --data-urlencode "search_query=$*" \
- | sed -n -E 's#^.*var ytInitialData ?=(.*)} *; *</script>.*#\1}#p' \
+ | tr -d '\n' \
+ | sed -e 's#^.*var \+ytInitialData *=##' -e 's#;</script>.*##' \
  | jq -r '..
     | .videoRenderer?
     | select(.)
