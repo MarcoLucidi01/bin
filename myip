@@ -1,0 +1,54 @@
+#!/bin/sh
+
+# myip: get "external" (wan) ip address
+
+dig="dig +short"
+curl="curl --silent --fail --location --max-time 5"
+
+# shuffle commands to not always "ping" the same server, but prefer dns queries
+# (which are faster) over http apis
+cmds="$(shuf << EOF
+$dig @ns1-1.akamaitech.net ANY whoami.akamai.net
+$dig @ns1.google.com TXT o-o.myaddr.l.google.com
+$dig @resolver1.opendns.com myip.opendns.com
+$dig @resolver2.opendns.com myip.opendns.com
+$dig @resolver3.opendns.com myip.opendns.com
+$dig @resolver4.opendns.com myip.opendns.com
+EOF
+)"
+
+cmds="$cmds
+$(shuf << EOF
+$curl https://api.ipify.org
+$curl https://checkip.amazonaws.com
+$curl https://ident.me
+$curl https://ifconfig.me/ip
+$curl https://ipecho.net/plain
+$curl https://ipinfo.io/ip
+$curl https://myip.dnsomatic.com
+EOF
+)"
+
+# set IFS to \n to iterate over lines
+IFS='
+'
+
+for cmd in $cmds; do
+        ip="$(eval "$cmd")"
+        if [ "$?" -ne 0 ]; then
+                continue
+        fi
+
+        # the ip string returned by some service may be quoted, so tr removes
+        # (also) " chars
+        ip="$(printf '%s' "$ip" | tr -d '"[:space:]')"
+        if [ -z "$ip" ]; then
+                continue
+        fi
+
+        printf '%s\n' "$ip"
+        exit 0
+done
+
+echo "error: unable to get wan ip" >&2
+exit 1
