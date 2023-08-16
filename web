@@ -8,7 +8,7 @@ defaultengine="https://www.google.com/search?q="
 
 case "$1" in
 "-h" | "--help")
-        echo "usage: web [-p|--private] [a|g|m|r|s|t|w|wa|y] [search query...|url|file]"
+        echo "usage: web [-p|--private] [a|g|gpt|m|r|s|t|w|wa|y] [search query...|url|file]"
         exit 0
         ;;
 "-p" | "--private")
@@ -22,6 +22,8 @@ case "$1" in
         baseurl="https://www.amazon.it/s/?field-keywords=" ;;
 "g")
         baseurl="https://www.google.com/search?q=" ;;
+"gpt")
+        baseurl="https://chat.openai.com/" ;;
 "m")
         baseurl="https://www.google.com/maps?q=" ;;
 "r")
