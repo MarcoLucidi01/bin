@@ -1,0 +1,202 @@
+#!/bin/sh
+
+# previewmd: preview markdown docs with `cmark` and `firefox`.
+
+oneshot=0
+keeppreview=0
+while true; do
+        case "$1" in
+        "-h" | "--help")
+                echo "usage: previewmd [-1|--one-shot | -k|--keep-preview] file"
+                exit 0
+                ;;
+        "-1" | "--one-shot")
+                oneshot=1
+                keeppreview=1 # --one-shot implies --keep-preview to keep the generated file
+                ;;
+        "-k" | "--keep-preview")
+                keeppreview=1
+                ;;
+        *)
+                break
+                ;;
+        esac
+
+        shift
+done
+
+if [ -z "$1" ]; then
+        echo "error: no file provided" >&2
+        exit 1
+fi
+
+fname="$1"
+fbasename="$(basename "$fname")"
+fpath="$(realpath "$fname")"
+
+# basic solarized css that respects system settings for light and dark mode
+css='
+:root {
+    --body-bg-color: #fdf6e3;
+    --body-color: #657b83;
+    --h-color: #073642;
+    --a-color: #dc322f;
+    --pre-bg-color: #eee8d5;
+    --pre-border-color: rgba(147, 161, 161, .5);
+    --blockquote-border-color: #e8e8e8;
+}
+
+@media (prefers-color-scheme: dark) {
+    :root {
+        --body-bg-color: #002b36;
+        --body-color: #839496;
+        --h-color: #93a1a1;
+        --a-color: #d33682;
+        --pre-bg-color: #073642;
+        --pre-border-color: #586e75;
+        --blockquote-border-color: #586e75;
+    }
+}
+
+body {
+    background-color: var(--body-bg-color);
+    color: var(--body-color);
+    font-family: sans-serif;
+    line-height: 1.5;
+    margin: auto;
+    max-width: 80ch;
+    padding: 2ch;
+}
+
+h1, h2 {
+    color: var(--h-color);
+    margin-bottom: .5rem;
+}
+
+a {
+    color: var(--a-color);
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+pre, code {
+    background-color: var(--pre-bg-color);
+    border-radius: 3px;
+    font-family: monospace;
+    font-size: .9rem;
+}
+
+pre {
+    border: 1px solid var(--pre-border-color);
+    overflow: auto;
+    padding: 1rem;
+}
+
+code {
+    padding: .15rem .3rem;
+}
+
+pre code {
+    padding: 0;
+}
+
+img {
+    width: 100%;
+}
+
+blockquote {
+    border-left: 7px solid var(--blockquote-border-color);
+    margin: 1.5rem 0;
+    padding: .2rem 1rem;
+}
+
+footer {
+    text-align: center;
+}
+
+.no-bullet {
+    list-style-type: none;
+    padding: 0;
+}
+'
+
+previewpath=""
+previewid=""
+
+dopreview() {
+        if [ ! -f "$fpath" ]; then
+                echo "error: $fname: no such file" >&2
+                return
+        fi
+
+        openpreview=0
+        if [ -z "$previewpath" ]; then
+                openpreview=1
+                previewpath="$(mktemp "$fpath.previewmd.XXXXX.html")"
+                # the `previewid` is just the mktemp XXXXX random sequence
+                previewid="$(printf '%s' "$previewpath" | awk -F . '{ print $(NF-1) }')"
+                # this escape should be good enough for my terminal emulator
+                # "open link" feature and "my" filenames
+                printf 'file://%s\n' "$previewpath" | sed 's/ /%20/g'
+        fi
+
+        # firefox puts the `<title>` of the page as xwindow name, we write the
+        # `previewid` there and then search it with `xdotool` to trigger a
+        # refresh
+        #
+        # - NOTE 1: this "trick" works only if the preview tab is the "current"
+        #           tab
+        #
+        # - NOTE 2: this "trick" doesn't work (well) with chromium: it seems
+        #           that the chromium window should already be focused to
+        #           "capture" the `xdotool` refresh
+        #
+        # (i use firefox (with X11) so (again) this is good enough for me)
+        printf '<!DOCTYPE html>
+<meta charset="utf-8">
+<meta name="generator" content="previewmd">
+<meta name="date" content="%s">
+<meta name="color-scheme" content="light dark">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>%s - previewmd - %s</title>
+<style>%s</style>
+' "$(date --rfc-email)" "$fbasename" "$previewid" "$css" > "$previewpath"
+
+        cmark --validate-utf8 --unsafe --smart "$fpath" >> "$previewpath"
+
+        if [ $openpreview -eq 1 ]; then
+                (cd "$HOME" && firefox "$previewpath" > /dev/null 2>&1 &)
+        else
+                xdotool search --name "previewmd - $previewid" key F5
+        fi
+}
+
+if [ $keeppreview -eq 0 ]; then
+        cleanexit() {
+                rm -rf "$previewpath"
+                exit 0
+        }
+        trap cleanexit INT TERM
+fi
+
+dopreview
+
+if [ $oneshot -eq 1 ]; then
+        # check if we were able to produce the preview file: if not, an
+        # error message has already been printed by `dopreview`
+        test -f "$previewpath"
+        exit $?
+fi
+
+while true; do
+        if [ -f "$fpath" ]; then
+                inotifywait --quiet --quiet --event modify "$fpath"
+        else
+                sleep 2
+        fi
+
+        dopreview
+done
