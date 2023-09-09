@@ -1,26 +1,28 @@
 #!/bin/sh
 
-# play: select and play files with mpv
+# play: select and play music with mpv
 
-case "$1" in
-"-h" | "--help")
-        echo "usage: play [-d|-s|file...]"
-        ;;
-"-d" | "")
-        if [ "$1" = "-d" ]; then
-                typed="-type d"
-                shift
-        fi
-        find "$HOME/music" -mindepth 1 -not -name '.*' $typed \
-         | shuf \
-         | fzf --delimiter / --with-nth 5.. --print0 \
-         | xargs --null --no-run-if-empty mpv "$@"
-        ;;
-"-s")
+while true; do
+        case "$1" in
+        "-h" | "--help")
+                echo "usage: play [-d|--directory | -s|--shuffle] [name]"
+                exit 0
+                ;;
+        "-d" | "--directory")
+                directory=1
+                ;;
+        "-s" | "--shuffle")
+                shuffle=1
+                ;;
+        *)
+                break
+                ;;
+        esac
+
         shift
-        mpv --shuffle "$@" "$HOME/music"
-        ;;
-*)
-        mpv "$@"
-        ;;
-esac
+done
+
+find "$HOME/music" -mindepth 1 -not -name '.*' ${directory:+-type d} \
+ | shuf \
+ | fzf --delimiter / --with-nth 5.. --print0 --select-1 ${*:+--query="$*"} \
+ | xargs --null --no-run-if-empty mpv ${shuffle:+--shuffle}
