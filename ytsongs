@@ -1,0 +1,16 @@
+#!/bin/sh
+
+# ytsongs: extract songs information listed in youtube video description.
+
+case "$1" in "-h" | "--help")
+        echo "usage: ytsongs url"
+        exit 0
+esac
+
+curl --silent --fail "$1" \
+ | tr -d '\n' \
+ | sed -e 's#^.*var \+ytInitialData *=##' -e 's#;</script>.*##' \
+ | jq --raw-output '
+     .engagementPanels[]?.engagementPanelSectionListRenderer.content.structuredDescriptionContentRenderer.items[]?.horizontalCardListRenderer.cards[]?.videoAttributeViewModel
+      | [.title, .subtitle, .secondarySubtitle.content, "https://www.youtube.com/watch?v=\(.onTap.innertubeCommand.watchEndpoint.videoId)"]
+      | @tsv'
