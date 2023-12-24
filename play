@@ -22,6 +22,11 @@ while true; do
         shift
 done
 
+if [ "$shuffle" = "1" ] && [ -z "$directory$time$*" ]; then
+        mpv --shuffle "$HOME/music"
+        exit $?
+fi
+
 find "$HOME/music" -mindepth 1 -not -name '.*' ${directory:+-type d} \
  | shuf \
  | fzf --delimiter / --with-nth 5.. --print0 --select-1 ${*:+--query="$*"} \
