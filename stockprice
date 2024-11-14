@@ -7,17 +7,27 @@ if [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
         exit 0
 fi
 
-agent="Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:109.0) Gecko/20100101 Firefox/116.0"
-
 while [ $# -gt 0 ]; do
         symbol="$(printf '%s' "$1" | tr '[:lower:]' '[:upper:]')"
         shift
 
-        curl --silent --fail --location "https://finance.yahoo.com/quote/$symbol" -H "User-Agent: $agent" \
-         | xmllint --html --xpath "//*[@data-symbol=\"$symbol\" and @data-field=\"regularMarketPrice\"]/parent::div//text()" - 2> /dev/null \
-         | awk -v "symbol=$symbol" 'BEGIN { printf("%s|%s", strftime("%Y-%m-%d %H:%M:%S"), symbol) } NF { printf("|%s", $0) } END { printf("\n") }' \
+        curl --silent --location "https://query2.finance.yahoo.com/v8/finance/chart/$symbol" \
+         | jq --raw-output '.chart | .result[0].meta as $meta | [ $meta.regularMarketPrice, $meta.previousClose, $meta.currency, .error.description ] | @tsv' \
+         | LC_ALL=C.UTF-8 awk -F '\t' -v "symbol=$symbol" '
+           BEGIN {
+               time = strftime("%Y-%m-%dT%H:%M:%S%z")
+           }
+           $NF {
+               printf("%s|||||%s|%s\n", symbol, time, $NF)
+           }
+           !$NF {
+               change = $1 - $2
+               sign   = change > 0 ? "+" : ""
+               perc   = change / $2 * 100
+               printf("%s|%.2f|%s%.2f|%s%.2f%%|%s|%s\n", symbol, $1, sign, change, sign, perc, $3, time)
+           }' \
          &
 
-done | sort | column --table --separator '|'
+done | sort | column --table --table-right 2,3,4 --separator '|'
 
 wait
