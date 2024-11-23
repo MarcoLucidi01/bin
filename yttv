@@ -1,0 +1,14 @@
+#!/bin/sh
+
+# yttv: open YouTube TV in fullscreen mode.
+#
+#       To open YouTube TV on a regular browser we need to set a "special"
+#       User-Agent, the one of the PS4 seems to be the better.
+#
+#       I use a firefox profile with a custom `user.js` file for this:
+#
+#       $ cat ~/.mozilla/firefox/d23ih39o.yttv/user.js
+#       user_pref("general.useragent.override", "Mozilla/5.0 (PS4; Leanback Shell) Sony PS4/ (PS4, , no, CH)");
+
+xdotool search --sync --onlyvisible --class "Firefox" windowactivate key F11 &
+firefox -P yttv -no-remote "https://youtube.com/tv"
