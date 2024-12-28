@@ -1,0 +1,52 @@
+#!/bin/sh
+
+# sfeedwrapper: wrapper for sfeed_update and sfeed_curses.
+
+set -e
+
+tmp="${TMPDIR:-/tmp}"
+sfeed="$HOME/.sfeed"
+updatedelay=$((60*60*4)) # 4 hours
+
+cleanup=0
+update=0
+while true; do
+        case "$1" in
+        "-h" | "--help")
+                echo "usage: sfeedwrapper [-c|--cleanup -u|--update]"
+                exit 0
+                ;;
+        "-c" | "--cleanup")
+                cleanup=1
+                ;;
+        "-u" | "--update")
+                update=1
+                ;;
+        *)
+                break
+                ;;
+        esac
+
+        shift
+done
+
+if [ $cleanup -eq 1 ]; then
+        rm -rf "$sfeed/feeds/"* "$sfeed/lastupdate" "$tmp/sfeedplumber"
+fi
+
+now=$(date +%s)
+last=$(cat "$sfeed/lastupdate" 2> /dev/null || echo 0)
+if [ $update -eq 1 ] || [ $((now - last)) -gt $updatedelay ]; then
+        sfeed_update && echo "$now" > "$sfeed/lastupdate"
+fi
+
+if [ ! -x "$tmp/sfeedplumber" ]; then
+        # can't pass options in SFEED_PLUMBER, so we need this little "hack"
+        printf '#!/bin/sh\nfirefox --private-window "$@"\n' > "$tmp/sfeedplumber"
+        chmod +x "$tmp/sfeedplumber"
+fi
+
+export SFEED_PLUMBER="$tmp/sfeedplumber"
+export SFEED_YANKER="xclip -rmlastnl -selection clipboard"
+# keep feeds order from definition
+awk -v "feeds=$sfeed/feeds" -F '"' '/^feed "/ { print "\""feeds"/"$2"\"" }' "$sfeed/feeds.def" | xargs sfeed_curses
